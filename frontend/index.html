@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple CRUD App</title>
+</head>
+<body>
+    <h1>Simple CRUD App</h1>
+    
+    <!-- Form to create a new record -->
+    <h2>Create Record</h2>
+    <form id="createRecordForm" method="POST">
+        <label for="id">ID:</label><br>
+        <input type="text" id="id" name="id" required><br>
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+        <input type="submit" value="Submit">
+    </form>
+    
+    <!-- Display existing records -->
+    <h2>Existing Records</h2>
+    <ul id="records">
+        <!-- Records will be displayed here dynamically -->
+    </ul>
+    
+    <!-- Script to fetch and display existing records -->
+    <script>
+
+        const backendServiceIP = "{{ backend_service_ip }}"; // Get backend service IP from Flask template
+
+        document.getElementById('createRecordForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('id', document.getElementById('id').value);
+            formData.append('username', document.getElementById('username').value);
+            formData.append('email', document.getElementById('email').value);
+
+            // Send POST request to the backend to insert data
+            fetch('http://${backendServiceIP}/create-record', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Fetch existing records
+        fetch('http://${backendServiceIP}/read-records')
+            .then(response => response.json())
+            .then(records => {
+                const recordsList = document.getElementById('records');
+                records.forEach(record => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `ID: ${record.id}, Username: ${record.username}, Email: ${record.email}`;
+                    recordsList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error('Error fetching records:', error));
+    </script>
+</body>
+</html>
